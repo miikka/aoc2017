@@ -14,37 +14,31 @@ class Notify is StdinNotify
 
     try
       while true do
-        var count: I32 = 0
+        var depth: I32 = 0
         var score: I32 = 0
         var garbage: I32 = 0
-        var mode: String = "base"
+        var state: String = "group"
 
         let line = _reader.line()?
         for char in line.values() do
-          match mode
-            | "base" =>
-            match char
-              | '<' => mode = "garbage"
-              | '{' => count = count + 1
-              | '}' =>
-              score = score + count
-              count = count - 1
-            end
-            | "garbage" =>
-            match char
-              | '!' => mode = "ignore"
-              | '>' => mode = "base"
-            else
-              garbage = garbage + 1
-            end
-            | "ignore" => mode = "garbage"
+          match (state, char)
+            | ("group", '<') => state = "garbage"
+            | ("group", '{') => depth = depth +1
+            | ("group", '}') =>
+              score = score + depth
+              depth = depth - 1
+            | ("group", ',') => None
+            | ("garbage", '!') => state = "ignore"
+            | ("garbage", '>') => state = "group"
+            | ("garbage", _) => garbage = garbage + 1
+            | ("ignore", _) => state = "garbage"
           else
-            _env.out.print("Bad mode: " + mode)
+            _env.out.print("Bad state and char: " + state + " " + char.string())
             error
           end
         end
 
-        _env.out.print("Score: " + score.string() + ", garbage count: " + garbage.string())
+        _env.out.print("Score: " + score.string() + ", garbage depth: " + garbage.string())
       end
     end
 
