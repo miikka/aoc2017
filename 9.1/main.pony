@@ -22,7 +22,7 @@ class Notify is StdinNotify
         let line = _reader.line()?
         for char in line.values() do
           match mode
-            | "base" => None
+            | "base" =>
             match char
               | '<' => mode = "garbage"
               | '{' => count = count + 1
@@ -30,7 +30,7 @@ class Notify is StdinNotify
               score = score + count
               count = count - 1
             end
-            | "garbage" => None
+            | "garbage" =>
             match char
               | '!' => mode = "ignore"
               | '>' => mode = "base"
